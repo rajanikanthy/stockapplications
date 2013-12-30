@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:cache="http://www.springframework.org/schema/cache" xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd
+		 http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd ">
+
+	<mvc:resources mapping="/resources/**" location="/resources/" />
+	<mvc:annotation-driven />
+	<cache:annotation-driven />
+
+	<context:property-placeholder location="classpath:jdbc.properties" />
+
+	<context:component-scan base-package="com.bhn.stockappui.controllers"></context:component-scan>
+
+
+	<!-- bean class="org.springframework.web.servlet.view.tiles3.TilesViewResolver" 
+		/> <bean class="org.springframework.web.servlet.view.tiles3.TilesConfigurer"> 
+		<property name="definitions"> <list> <value>/WEB-INF/views/**/views.xml</value> 
+		</list> </property> </bean -->
+
+	<bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheCacheManager"
+		p:cacheManager-ref="ehcache" />
+
+
+	<bean id="ehcache"
+		class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"
+		p:configLocation="classpath:ehcache.xml" p:shared="true" />
+
+	<bean
+		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/" />
+		<property name="suffix" value=".jsp" />
+	</bean>
+
+	<bean id="httpClient" class="org.apache.http.impl.client.DefaultHttpClient">
+		<constructor-arg>
+			<bean class="org.apache.http.impl.conn.PoolingClientConnectionManager" />
+		</constructor-arg>
+	</bean>
+
+	<bean id="historicQuoteExtractor" class="com.bhn.stockapp.yahoo.HistoricQuoteExtractor">
+		<property name="uri">
+			<value>
+			<![CDATA[
+				http://ichart.yahoo.com/table.csv?s={symbol}&a={sm}&b={sd}&&c={sy}&a={em}&b={ed}&c={ey} 
+			]]>
+			</value>
+		</property>
+	</bean>
+
+	<bean id="restTemplate" class="org.springframework.web.client.RestTemplate">
+		<constructor-arg>
+			<bean
+				class="org.springframework.http.client.HttpComponentsClientHttpRequestFactory">
+				<constructor-arg ref="httpClient" />
+			</bean>
+		</constructor-arg>
+	</bean>
+	
+	<bean id="appBrowser" class="org.openqa.selenium.htmlunit.HtmlUnitDriver">
+		<constructor-arg>
+			<value type="com.gargoylesoftware.htmlunit.BrowserVersion">CHROME_16</value>
+		</constructor-arg>
+	</bean>
+	<bean id="upComingIPOExtractor" class="com.bhn.stockapp.webdriver.UpcomingIPOExtractor">
+		<constructor-arg value="http://www.nasdaq.com/markets/ipos/activity.aspx?tab=upcoming" />
+	</bean>
+	
+	
+	<bean id="trackerManager" class="com.bhn.stockappui.dao.TrackerManager" />
+	<bean id="trackerService" class="com.bhn.stockappui.services.TrackerService" />
+	<bean id="trackerDao" class="com.bhn.stockappui.dao.TrackerDAO" />
+	
+	<bean id="otcTrackerManager" class="com.bhn.stockappui.dao.OTCTrackerManager" />
+	<bean id="otcTrackerService" class="com.bhn.stockappui.services.OTCTrackerService" />
+	<bean id="otcTrackerDao" class="com.bhn.stockappui.dao.OTCTrackerDAO" />
+
+</beans>

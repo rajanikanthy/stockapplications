@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<file>c:/work/temp/stockapp/logs/stockapp-ui.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+			<fileNamePattern>c:/work/temp/stockapp/logs/stockapp-ui.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<maxHistory>30</maxHistory>
+		</rollingPolicy>
+		<append>true</append>
+		<!-- encoders are assigned the type ch.qos.logback.classic.encoder.PatternLayoutEncoder 
+			by default -->
+		<layout class="ch.qos.logback.classic.PatternLayout">
+			<pattern>%d - %-4relative [%thread] %-5level %logger{35} - %msg%n
+			</pattern>
+		</layout>
+	</appender>
+	<logger name="org.springframework">
+		<level value="INFO" />
+	</logger>
+	<logger name="org.apache">
+		<level value="INFO" />
+	</logger>
+
+	<root level="INFO">
+		<appender-ref ref="FILE" />
+	</root>
+</configuration>

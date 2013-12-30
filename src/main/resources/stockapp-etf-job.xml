@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xmlns:int="http://www.springframework.org/schema/integration"
+	xmlns:int-file="http://www.springframework.org/schema/integration/file"
+	xmlns:batch="http://www.springframework.org/schema/batch"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xsi:schemaLocation="http://www.springframework.org/schema/integration http://www.springframework.org/schema/integration/spring-integration-2.1.xsd
+		http://www.springframework.org/schema/integration/file http://www.springframework.org/schema/integration/file/spring-integration-file-2.1.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-3.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.2.xsd
+		http://www.springframework.org/schema/batch http://www.springframework.org/schema/batch/spring-batch.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.2.xsd">
+
+	  <context:property-placeholder location="classpath:jdbc.properties" />
+
+	
+	 
+	<bean id="etfQuoteExtractor" class="com.bhn.stockapp.yahoo.QuoteExtractor">
+		<property name="outputDirectory" value="${output.directory}/etfs/" />
+		<property name="filePrefix" value="etfstockquotes" />
+		<property name="url" value="${stockapp.financeurl}" />
+		<property name="fetchSize" value="100" />
+	</bean>
+	
+	
+	<bean id="jdbcTemplate" class="org.springframework.jdbc.core.JdbcTemplate">
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	
+	<bean id="etfQuoteReader" class="org.springframework.batch.item.database.JdbcPagingItemReader" scope="step">
+		<property name="dataSource" ref="dataSource" />
+		<property name="queryProvider">
+			<bean id="queryProviderFactoryBean"	class="org.springframework.batch.item.database.support.SqlPagingQueryProviderFactoryBean">
+				<property name="sortKey" value="symbol" />
+				<property name="selectClause">
+					<value>
+						<![CDATA[
+							SELECT `id`,`symbol`,`etf_name`,`product_category`,`market_maker`
+						]]>
+					</value>
+				</property>
+				<property name="fromClause">
+					<value>
+						<![CDATA[
+							FROM `stocks`.`stock_etf_symbols`
+						]]>
+					</value>
+				</property>
+				<property name="dataSource" ref="dataSource" />
+			</bean>
+		</property>
+		<property name="pageSize" value="100" />
+		<property name="rowMapper">
+			<bean class="org.springframework.jdbc.core.BeanPropertyRowMapper" >
+				<property name="mappedClass">
+					<value type="java.lang.Class">com.bhn.stockapp.ftp.ETFSymbol</value>
+				</property>
+			</bean>
+		</property>
+	</bean>
+	
+	<bean id="etfQuoteWriter" class="com.bhn.stockapp.yahoo.QuoteItemBatchWriter">
+		<property name="quoteExtractor" ref="etfQuoteExtractor" />
+	</bean>
+	
+	<bean id="etfQuoteFlatFileItemReader" class="org.springframework.batch.item.file.FlatFileItemReader">
+		<property name="strict" value="false" />
+		<property name="lineMapper">
+			<bean class="org.springframework.batch.item.file.mapping.DefaultLineMapper">
+				<property name="fieldSetMapper">
+					<bean class="com.bhn.stockapp.yahoo.QuoteFieldSetMapper" scope="step" />
+				</property>
+				<property name="lineTokenizer">
+					<bean class="org.springframework.batch.item.file.transform.DelimitedLineTokenizer" />
+				</property>
+			</bean>
+		</property> 
+	</bean>
+	
+	<bean id="etfMultiQuoteReader" class="org.springframework.batch.item.file.MultiResourceItemReader" scope="step">
+		<property name="resources" value="file://${app.dir}/output/etfs/*.csv" />
+		<property name="delegate" ref="etfQuoteFlatFileItemReader" />
+	</bean>
+	
+	<bean id="etfQuoteDbWriter" class="org.springframework.batch.item.database.JdbcBatchItemWriter">
+		<property name="assertUpdates" value="false" />
+		<property name="itemSqlParameterSourceProvider">
+			<bean
+				class="org.springframework.batch.item.database.BeanPropertyItemSqlParameterSourceProvider" />
+		</property>
+		<property name="sql">
+			<value>
+				<![CDATA[
+					INSERT INTO `stocks`.`stock_etf_quotes`(`uid`, `symbol`,`security_name`,`current_price`,
+									`fetch_date`,`fetch_time`,`day_open`,`day_high`,`day_low`,
+									`dividend`,`pe_ratio`,`change_percentage`,`52_week_high`,`52_week_low`, `volume`, `exchange`)
+					VALUES (:uid, :symbol,:securityName,:currentPrice,:fetchDate,:fetchTime,:dayOpen,
+								:dayHigh,:dayLow,:dividend,:peRatio,:changePercentage, :fiftyWeekHigh, :fiftyWeekLow, :volume, :exchange)
+					ON DUPLICATE KEY UPDATE current_price = :currentPrice, fetch_date = :fetchDate, 
+						fetch_time = :fetchTime, day_open = :dayOpen, day_high = :dayHigh, day_low = :dayLow, 
+						dividend = :dividend, pe_ratio = :peRatio, change_percentage = :changePercentage, 
+						52_week_high = :fiftyWeekHigh, 52_week_low = :fiftyWeekLow, volume = :volume, exchange = :exchange
+				]]>
+			</value>
+		</property>
+		<property name="dataSource" ref="dataSource" />
+	</bean>
+	
+	<bean id="etfQuotesIncrementer" class="org.springframework.batch.core.launch.support.RunIdIncrementer" />
+	
+	
+	<bean id="etfFileDeletingTask" class="com.bhn.stockapp.yahoo.FileDeletingTasklet" scope="step">
+		<property name="extension" value="csv" />
+		<property name="directoryResource">
+			<bean id="directory" class="org.springframework.core.io.FileSystemResource">
+				<constructor-arg value="${output.directory}/etfs" />
+			</bean>
+		</property>
+	</bean>
+	
+	<batch:job id="importEtfQuotes" incrementer="etfQuotesIncrementer">
+		<batch:step id="etfQuoteSync">
+			<batch:tasklet>
+				<batch:chunk reader="etfQuoteReader" writer="etfQuoteWriter" commit-interval="200" />
+			</batch:tasklet>
+			<batch:next on="COMPLETED" to="etfQuoteDbSync"/>
+			<batch:end on="FAILED" />
+		</batch:step>
+		<batch:step id="etfQuoteDbSync">
+			<batch:tasklet>
+				<batch:chunk reader="etfMultiQuoteReader" writer="etfQuoteDbWriter" commit-interval="500" />
+			</batch:tasklet>
+			<batch:next on="COMPLETED" to="deleteCsvFiles"/>
+			<batch:end on="FAILED" />
+		</batch:step>
+		<batch:step id="deleteCsvFiles">
+			<batch:tasklet ref="etfFileDeletingTask" />
+		</batch:step>
+	</batch:job>
+				
+ </beans>
+

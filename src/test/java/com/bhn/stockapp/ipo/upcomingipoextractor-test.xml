@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:cache="http://www.springframework.org/schema/cache"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/cache http://www.springframework.org/schema/cache/spring-cache.xsd">
+
+	<bean id="appBrowser" class="org.openqa.selenium.htmlunit.HtmlUnitDriver" destroy-method="quit" >
+		<constructor-arg>
+			<value type="com.gargoylesoftware.htmlunit.BrowserVersion">CHROME_16</value>
+		</constructor-arg>
+	</bean>
+	
+	<bean id="upComingIPOExtractor" class="com.bhn.stockapp.webdriver.UpcomingIPOExtractor">
+		<constructor-arg value="http://www.nasdaq.com/markets/ipos/activity.aspx?tab=upcoming" />
+	</bean>
+	
+</beans>
