@@ -78,5 +78,9 @@
 	<bean id="otcTrackerManager" class="com.bhn.stockappui.dao.OTCTrackerManager" />
 	<bean id="otcTrackerService" class="com.bhn.stockappui.services.OTCTrackerService" />
 	<bean id="otcTrackerDao" class="com.bhn.stockappui.dao.OTCTrackerDAO" />
+	
+	<bean id="etfTrackerManager" class="com.bhn.stockappui.dao.ETFTrackerManager" />
+	<bean id="etfTrackerService" class="com.bhn.stockappui.services.ETFTrackerService" />
+	<bean id="etfTrackerDao" class="com.bhn.stockappui.dao.ETFTrackerDAO" />
 
 </beans>
