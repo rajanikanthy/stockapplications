@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 	<appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-		<file>c:/work/temp/stockapp/logs/stockapp-ui.log</file>
+		<file>${app.dir}/logs/stockapp-ui.log</file>
 		<rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-			<fileNamePattern>c:/work/temp/stockapp/logs/stockapp-ui.%d{yyyy-MM-dd}.log</fileNamePattern>
+			<fileNamePattern>${app.dir}/logs/stockapp-ui.%d{yyyy-MM-dd}.log</fileNamePattern>
 			<maxHistory>30</maxHistory>
 		</rollingPolicy>
 		<append>true</append>

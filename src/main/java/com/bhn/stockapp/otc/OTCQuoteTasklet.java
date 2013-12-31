@@ -30,18 +30,22 @@ public class OTCQuoteTasklet implements Tasklet {
 
 	@Autowired
 	private SeleniumExtractor<OTCQuote> extractor;
+	
+	@Autowired
+	private String insertQuery;
 
 	public RepeatStatus execute(StepContribution contrib, ChunkContext context) throws Exception {
-		logger.info("Task started at {} " + System.currentTimeMillis());
+		logger.info("Task started at {} " , System.currentTimeMillis());
 		insertQuotes(extractor.extract());
+		logger.info("Task ended at {} " , System.currentTimeMillis());
 		return RepeatStatus.FINISHED;
 
 	}
 
 	public void insertQuotes(final List<OTCQuote> otcQuotes) {
 		final Long uid = System.currentTimeMillis();
-		String sql = " INSERT INTO STOCK_OTC_QUOTES(`uid`, `symbol`, `security_name`, `tier`, `price`, `change`, `volume`,`security_type`,`locale`) values (?,?,?,?,?,?,?,?,?) ";
-		jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+		//String sql = " INSERT INTO STOCK_OTC_QUOTES(`uid`, `symbol`, `security_name`, `tier`, `price`, `change`, `volume`,`security_type`,`locale`) values (?,?,?,?,?,?,?,?,?) ";
+		jdbcTemplate.batchUpdate(insertQuery, new BatchPreparedStatementSetter() {
 
 			public void setValues(PreparedStatement ps, int i) throws SQLException {
 				OTCQuote quote = otcQuotes.get(i);
@@ -68,6 +72,10 @@ public class OTCQuoteTasklet implements Tasklet {
 	
 	public void setExtractor(SeleniumExtractor<OTCQuote> extractor) {
 		this.extractor = extractor;
+	}
+	
+	public void setInsertQuery(String insertQuery) {
+		this.insertQuery = insertQuery;
 	}
 
 }

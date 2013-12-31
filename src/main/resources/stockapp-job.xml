@@ -231,6 +231,7 @@
    <bean id="otcQuoteExtractorTask" class="com.bhn.stockapp.otc.OTCQuoteTasklet">
    		<property name="jdbcTemplate" ref="jdbcTemplate" />
    		<property name="extractor" ref="otcQuoteExtractor" />
+   		<property name="insertQuery" value="INSERT INTO stock_otc_quotes(`uid`, `symbol`, `security_name`, `tier`, `price`, `change`, `volume`,`security_type`,`locale`) values (?,?,?,?,?,?,?,?,?)" />
    </bean>	
 	
 	<batch:job id="quoteSync" incrementer="stockIdIncrementer">
