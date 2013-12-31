@@ -14,7 +14,7 @@ public class OTCTrackerDAO implements Tracker<OTCQuote> {
 
 	private static final Logger logger = LoggerFactory.getLogger(OTCTrackerDAO.class);
 
-	private static final StringBuffer SQL_OTC_TOP_QUOTES = new StringBuffer("SELECT * FROM stock_otc_quotes WHERE UID = ( SELECT MAX(UID) FROM STOCK_OTC_QUOTES ) ORDER BY `CHANGE` DESC LIMIT 20");
+	private static final StringBuffer SQL_OTC_TOP_QUOTES = new StringBuffer("SELECT * FROM stock_otc_quotes WHERE UID = ( SELECT MAX(UID) FROM stock_otc_quotes ) ORDER BY `CHANGE` DESC LIMIT 20");
 	
 	public Collection<OTCQuote> getTopQuotes(JdbcTemplate jdbcTemplate) {
 		logger.info("Getting >>>>>>>>> TOP10_OTC_QUOTES <<<<<<<<<<<< ...");
