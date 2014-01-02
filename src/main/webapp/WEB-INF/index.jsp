@@ -19,6 +19,7 @@
 <script type="text/javascript" src="resources/js/otc-volume-chart-panel.js"></script>
 <script type="text/javascript" src="resources/js/ipo-panel.js"></script>
 <script type="text/javascript" src="resources/js/etf-realtime-quote-panel.js"></script>
+<script type="text/javascript" src="resources/js/top-quotes-30days.js"></script>
 
 
 
@@ -43,6 +44,7 @@
 		otcvPanel = new OTCVolumeChartPanel("volume-panel");
 		var ipoPanel = new IPOPanel("volume-panel");
 		var etfPanel = new ETFRealTimePanel("volume-panel");
+		var topquote30days = new TopQuote30Days("volume-panel");
 		$('#tt').tree({
 			onSelect : function(node) {
 				$("#volume-panel").empty();
@@ -58,9 +60,11 @@
 					ipoPanel.show();
 				} else if ( node.text == "Top ETF Quotes") {
 					etfPanel.showTopQuotes();
+				} else if ( node.text == "Top Quotes - Past 30 Days") {
+					topquote30days.show();
 				}
 			}
-		})
+		});
 	});
 </script>
 
@@ -71,6 +75,7 @@
 			<li><span id="3">Top OTC Quotes</span></li>
 			<li><span id="5">IPOs</span></li>
 			<li><span id="6">Top ETF Quotes</span></li>
+			<li><span id="7">Top Quotes - Past 30 Days</span></li>
 		</ul>
 	</div>
 	<!-- div id="data-panel" data-options="region:'center',title:'DashBoard'" style="padding: 5px; background: #eee;">
