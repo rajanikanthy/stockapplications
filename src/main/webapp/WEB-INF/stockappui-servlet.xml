@@ -46,7 +46,7 @@
 		<property name="uri">
 			<value>
 			<![CDATA[
-				http://ichart.yahoo.com/table.csv?s={symbol}&a={sm}&b={sd}&&c={sy}&a={em}&b={ed}&c={ey} 
+				http://ichart.finance.yahoo.com/table.csv?s={symbol}&a={sm}&b={sd}&&c={sy}&a={em}&b={ed}&c={ey} 
 			]]>
 			</value>
 		</property>

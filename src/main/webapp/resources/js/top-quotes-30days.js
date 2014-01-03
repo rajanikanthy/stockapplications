@@ -3,9 +3,8 @@ function TopQuote30Days(id) {
 	this.panelId = id, this.show = function() {
 		var id = this.panelId;
 		var dg_rt_topquotes = id + "dg_topquotes";
-		
-
-		$('#' + id).append($("<table></table>").attr({
+		var dataMap = {};
+		$('#' + id).append($("<div></div>").attr({
 			id : dg_rt_topquotes
 		}));
 		
@@ -14,13 +13,27 @@ function TopQuote30Days(id) {
 			url : '/stockapp-frontend/home/topquotes/30',
 			async : false
 		}).done(function(data){
-			var currentDate;
-			var columns = new Array();
+			
 			$.each(data, function(index, element){
-				currentDate = element.fetchDate;
-				if ( $.inArray( currentDate, columns) == -1 ) columns.push(currentDate);
+				if ( dataMap[element.fetchDate] == undefined ) {
+					dataMap[element.fetchDate] = element.symbol + "(" + element.changePercentage + ")";
+				} else {
+					var symbollist = dataMap[element.fetchDate];
+					symbollist = symbollist + "," + element.symbol + "(" + element.changePercentage + ")";
+					dataMap[element.fetchDate] =symbollist; 
+				}
 			});
-			console.log(columns);
+			console.log(dataMap);
+			for(var fetchDate in dataMap) {
+				var content = $('<ul class="dateul"></ul>');
+				content.append($('<li class="symbolli">' + fetchDate + '</li>'));
+				var symbols = dataMap[fetchDate].split(",");
+				for(var i = 0; i < symbols.length ; i++) {
+					content.append($('<li class="symbolli">' + symbols[i] + '</li>'));
+				}
+				content.append("<br/>");
+				$('#' + dg_rt_topquotes).append(content); 
+			}
 		});
 		
 	};

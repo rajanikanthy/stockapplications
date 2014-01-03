@@ -97,16 +97,17 @@ public class TrackerDAO implements Tracker<TrackerBO> {
 																				.append(" LIMIT 20");
 
 	private static final StringBuffer	SQL_TOP_QUOTE_N_DAYS			= new StringBuffer(
-																				"select max(uid) ")
+																				"select concat(cast(max(uid) as char),',',fetch_date)  ")
 																				.append(" from stock_quotes ")
 																				.append(" where str_to_date(fetch_date, '%m/%d/%Y') between date(date_sub(now() + 1, interval ? day)) and date(date_add(now(), interval 1 day)) ")
 																				.append(" group by str_to_date(fetch_date,'%m/%d/%Y') ")
-																				.append(" order  by fetch_date desc ");
+																				.append(" order  by str_to_date(fetch_date,'%m/%d/%Y') desc ");
 
 	private static final StringBuffer	SQL_GET_TOP_QUOTES_BY_UID		= new StringBuffer(
 																				"select symbol, current_price, change_percentage, fetch_date ")
 																				.append(" from stock_quotes ")
 																				.append(" where uid = ? and current_price between 2 and 5 ")
+																				.append(" and fetch_date = ? ")
 																				.append(" order by change_percentage desc  ")
 																				.append(" limit 20 ");
 
@@ -147,14 +148,15 @@ public class TrackerDAO implements Tracker<TrackerBO> {
 	public Collection<Quote> getTopQuotePastNDays(JdbcTemplate jdbcTemplate,
 			int nDays) {
 		logger.info("Executing query {} ", SQL_TOP_QUOTE_N_DAYS.toString());
-		Collection<Long> uids = jdbcTemplate.queryForList(
+		Collection<String> uids = jdbcTemplate.queryForList(
 				SQL_TOP_QUOTE_N_DAYS.toString(), new Object[] { nDays },
-				Long.class);
+				String.class);
 		
 		Collection<Quote> topQuotes = new ArrayList<Quote>();
-		for(Long uid : uids) {
-			logger.info("Executing query => {}, argument uid => {}", SQL_GET_TOP_QUOTES_BY_UID.toString(), uid );
-			Collection<Quote> quotes = jdbcTemplate.query(SQL_GET_TOP_QUOTES_BY_UID.toString(), new Object[]{ uid } , new  BeanPropertyRowMapper<Quote>(Quote.class));
+		for(String uid : uids) {
+			String[] tokens = uid.split(",");
+			logger.info("Executing query => {}, argument uid => {} ", SQL_GET_TOP_QUOTES_BY_UID.toString(), uid );
+			Collection<Quote> quotes = jdbcTemplate.query(SQL_GET_TOP_QUOTES_BY_UID.toString(), new Object[]{ tokens[0], tokens[1] } , new  BeanPropertyRowMapper<Quote>(Quote.class));
 			logger.info("------------------------- {} ## BEGIN ## ------------------", uid );
 			for(Quote quote : quotes) {
 				logger.info(quote.toString());

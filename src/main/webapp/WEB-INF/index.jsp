@@ -8,6 +8,7 @@
 <link rel="stylesheet" type="text/css" href="resources/jquery-easyui-1.3.2/themes/default/easyui.css" />
 <link rel="stylesheet" type="text/css" href="resources/jquery-easyui-1.3.2/themes/icon.css" />
 <link rel="stylesheet" type="text/css" href="resources/jquery-plot/jquery.jqplot.css" />
+<link rel="stylesheet" type="text/css" href="resources/css/styles.css" />
 <script type="text/javascript" src="resources/jquery-easyui-1.3.2/jquery-1.8.0.min.js"></script>
 <script type="text/javascript" src="resources/jquery-easyui-1.3.2/jquery.easyui.min.js"></script>
 <script type="text/javascript" src="resources/jquery-plot/jquery.jqplot.min.js"></script>
