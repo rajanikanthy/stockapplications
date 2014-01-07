@@ -1,0 +1,21 @@
+@CHARSET "ISO-8859-1";
+
+.square {
+	float: left;
+	width: 100px;
+	height: 15px;
+	display: block;
+	overflow: hidden;
+}
+
+.dateul {
+	list-style-type: none;
+	margin: 0px;
+	padding: 5px;
+}
+
+.symbolli {
+	display:inline;
+	float : left;
+	margin : 5px;
+}
